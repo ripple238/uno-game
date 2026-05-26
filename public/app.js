@@ -9,10 +9,10 @@ let selectedCardIndex = null;
 let drawnCard = null;
 let isHost = false;
 let soundEnabled = true;
-let animationsEnabled = true;
 let currentTheme = 'classic';
+let myPlayerIndex = -1;
 
-// ===== AUDIO (Web Audio API - no external files needed) =====
+// ===== AUDIO ENGINE =====
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 
@@ -20,68 +20,68 @@ function initAudio() {
   if (!audioCtx) audioCtx = new AudioCtx();
 }
 
-function playSound(type) {
+function playTone(freq, type, duration, volume = 0.15) {
   if (!soundEnabled || !audioCtx) return;
   try {
     const osc = audioCtx.createOscillator();
     const gain = audioCtx.createGain();
     osc.connect(gain);
     gain.connect(audioCtx.destination);
-
-    const now = audioCtx.currentTime;
-    switch(type) {
-      case 'play':
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(523, now);
-        osc.frequency.setValueAtTime(659, now + 0.1);
-        gain.gain.setValueAtTime(0.15, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-        osc.start(now);
-        osc.stop(now + 0.3);
-        break;
-      case 'draw':
-        osc.type = 'triangle';
-        osc.frequency.setValueAtTime(300, now);
-        osc.frequency.linearRampToValueAtTime(200, now + 0.2);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-        osc.start(now);
-        osc.stop(now + 0.2);
-        break;
-      case 'uno':
-        osc.type = 'square';
-        osc.frequency.setValueAtTime(880, now);
-        osc.frequency.setValueAtTime(1100, now + 0.15);
-        gain.gain.setValueAtTime(0.1, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
-        osc.start(now);
-        osc.stop(now + 0.4);
-        break;
-      case 'win':
-        [523, 659, 784, 1047].forEach((freq, i) => {
-          const o = audioCtx.createOscillator();
-          const g = audioCtx.createGain();
-          o.connect(g);
-          g.connect(audioCtx.destination);
-          o.type = 'sine';
-          o.frequency.value = freq;
-          g.gain.setValueAtTime(0.1, now + i * 0.15);
-          g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.15 + 0.3);
-          o.start(now + i * 0.15);
-          o.stop(now + i * 0.15 + 0.3);
-        });
-        break;
-      case 'special':
-        osc.type = 'sawtooth';
-        osc.frequency.setValueAtTime(400, now);
-        osc.frequency.exponentialRampToValueAtTime(800, now + 0.15);
-        gain.gain.setValueAtTime(0.08, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
-        osc.start(now);
-        osc.stop(now + 0.25);
-        break;
-    }
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+    gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+    osc.start(audioCtx.currentTime);
+    osc.stop(audioCtx.currentTime + duration);
   } catch(e) {}
+}
+
+function playChord(freqs, type, duration, volume = 0.12) {
+  if (!soundEnabled || !audioCtx) return;
+  freqs.forEach((freq, i) => {
+    setTimeout(() => playTone(freq, type, duration, volume), i * 80);
+  });
+}
+
+function playSound(type) {
+  initAudio();
+  switch(type) {
+    case 'play':
+      playTone(523, 'sine', 0.25, 0.12);
+      setTimeout(() => playTone(659, 'sine', 0.25, 0.12), 100);
+      break;
+    case 'special':
+      playTone(400, 'sawtooth', 0.15, 0.1);
+      setTimeout(() => playTone(600, 'sawtooth', 0.2, 0.1), 100);
+      setTimeout(() => playTone(800, 'sawtooth', 0.3, 0.1), 200);
+      break;
+    case 'wild':
+      playChord([523, 659, 784], 'sine', 0.4, 0.1);
+      break;
+    case 'draw':
+      playTone(300, 'triangle', 0.15, 0.1);
+      setTimeout(() => playTone(250, 'triangle', 0.15, 0.08), 80);
+      break;
+    case 'uno':
+      playTone(880, 'square', 0.15, 0.08);
+      setTimeout(() => playTone(1100, 'square', 0.2, 0.08), 120);
+      setTimeout(() => playTone(1320, 'square', 0.3, 0.08), 240);
+      break;
+    case 'win':
+      playChord([523, 659, 784, 1047], 'sine', 0.5, 0.1);
+      setTimeout(() => playChord([659, 784, 1047, 1319], 'sine', 0.5, 0.1), 300);
+      setTimeout(() => playChord([784, 1047, 1319, 1568], 'sine', 0.6, 0.1), 600);
+      break;
+    case 'pass':
+      playTone(350, 'sine', 0.2, 0.08);
+      break;
+    case 'error':
+      playTone(200, 'sawtooth', 0.3, 0.08);
+      break;
+    case 'turn':
+      playTone(440, 'sine', 0.15, 0.08);
+      break;
+  }
 }
 
 // ===== DOM =====
@@ -126,7 +126,6 @@ document.querySelectorAll('.btn-back').forEach(btn => {
   btn.addEventListener('click', () => showScreen('landing'));
 });
 
-// Theme selector
 document.querySelectorAll('.theme-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
@@ -135,7 +134,6 @@ document.querySelectorAll('.theme-btn').forEach(btn => {
   });
 });
 
-// Score selector
 document.querySelectorAll('.seg-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.seg-btn').forEach(b => b.classList.remove('active'));
@@ -146,7 +144,7 @@ document.querySelectorAll('.seg-btn').forEach(btn => {
 // Create Room
 document.getElementById('btn-create-confirm').addEventListener('click', () => {
   const name = document.getElementById('create-name').value.trim();
-  if (!name) { showToast('Enter your name', 'error'); return; }
+  if (!name) { showToast('Enter your name', 'error'); playSound('error'); return; }
 
   const targetScore = parseInt(document.querySelector('.seg-btn.active')?.dataset.score || '500');
   const theme = currentTheme;
@@ -161,8 +159,10 @@ document.getElementById('btn-create-confirm').addEventListener('click', () => {
       showScreen('lobby');
       updateLobby(roomCode);
       showToast('Room created! Share the code', 'success');
+      playSound('win');
     } else {
       showToast(res.error || 'Failed', 'error');
+      playSound('error');
     }
   });
 });
@@ -171,7 +171,7 @@ document.getElementById('btn-create-confirm').addEventListener('click', () => {
 document.getElementById('btn-join-confirm').addEventListener('click', () => {
   const code = document.getElementById('join-code').value.trim().toUpperCase();
   const name = document.getElementById('join-name').value.trim();
-  if (!code || !name) { showToast('Fill all fields', 'error'); return; }
+  if (!code || !name) { showToast('Fill all fields', 'error'); playSound('error'); return; }
 
   playerName = name;
   socket.emit('join-room', { roomCode: code, playerName: name }, (res) => {
@@ -180,8 +180,10 @@ document.getElementById('btn-join-confirm').addEventListener('click', () => {
       currentTheme = res.theme || 'classic';
       showScreen('lobby');
       updateLobby(code);
+      playSound('play');
     } else {
       showToast(res.error || 'Failed', 'error');
+      playSound('error');
     }
   });
 });
@@ -208,7 +210,10 @@ document.getElementById('btn-spectate-confirm').addEventListener('click', () => 
 
 // Copy code
 document.getElementById('btn-copy-code').addEventListener('click', () => {
-  navigator.clipboard.writeText(roomCode).then(() => showToast('Copied!', 'success'));
+  navigator.clipboard.writeText(roomCode).then(() => {
+    showToast('Copied!', 'success');
+    playSound('play');
+  });
 });
 
 // Add bots
@@ -224,7 +229,10 @@ document.querySelectorAll('.btn-bot').forEach(btn => {
 // Start game
 document.getElementById('btn-start-game').addEventListener('click', () => {
   socket.emit('start-game', null, (res) => {
-    if (!res.success) showToast(res.error || 'Failed', 'error');
+    if (!res.success) {
+      showToast(res.error || 'Failed', 'error');
+      playSound('error');
+    }
   });
 });
 
@@ -250,6 +258,7 @@ document.getElementById('btn-draw').addEventListener('click', () => {
       showToast('Card drawn. Play or pass.', 'info');
     } else {
       showToast(res.error, 'error');
+      playSound('error');
     }
   });
 });
@@ -258,11 +267,13 @@ document.getElementById('btn-draw').addEventListener('click', () => {
 document.getElementById('btn-pass').addEventListener('click', () => {
   socket.emit('pass-turn', null, (res) => {
     if (res.success) {
+      playSound('pass');
       drawnCard = null;
       document.getElementById('btn-draw').style.display = 'inline-flex';
       document.getElementById('btn-pass').style.display = 'none';
     } else {
       showToast(res.error, 'error');
+      playSound('error');
     }
   });
 });
@@ -278,13 +289,13 @@ document.getElementById('btn-uno').addEventListener('click', () => {
 // Color picker
 document.querySelectorAll('.color-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    playSound('special');
+    playSound('wild');
     playSelectedCard(btn.dataset.color);
     document.getElementById('color-modal').classList.remove('active');
   });
 });
 
-// Game menu / chat
+// Chat
 document.getElementById('btn-game-menu').addEventListener('click', () => {
   document.getElementById('chat-panel').classList.add('active');
 });
@@ -300,15 +311,7 @@ document.getElementById('btn-sound-toggle').addEventListener('click', function()
   showToast(soundEnabled ? 'Sound ON' : 'Sound OFF', 'info');
 });
 
-// Settings
-document.getElementById('btn-game-menu').addEventListener('dblclick', () => {
-  document.getElementById('settings-modal').classList.add('active');
-});
-document.getElementById('btn-close-settings').addEventListener('click', () => {
-  document.getElementById('settings-modal').classList.remove('active');
-});
-
-// Chat
+// Chat send
 document.getElementById('btn-send-chat').addEventListener('click', sendChat);
 document.getElementById('chat-input').addEventListener('keypress', (e) => {
   if (e.key === 'Enter') sendChat();
@@ -329,10 +332,11 @@ document.querySelectorAll('.emoji-btn').forEach(btn => {
     const emoji = btn.dataset.emoji;
     socket.emit('emoji-reaction', emoji);
     showFloatingEmoji(emoji);
+    playSound('play');
   });
 });
 
-// Game over buttons
+// Game over
 document.getElementById('btn-play-again').addEventListener('click', () => {
   document.getElementById('gameover-modal').classList.remove('active');
   socket.emit('start-game', null, () => {});
@@ -346,11 +350,22 @@ socket.on('room-update', (room) => {
 });
 
 socket.on('game-state', (state) => {
+  const wasMyTurn = gameState && gameState.isYourTurn;
   gameState = state;
+  myPlayerIndex = state.yourIndex;
+
   if (currentScreen !== 'game') {
     showScreen('game');
     document.getElementById('game-room-code').textContent = 'Room: ' + roomCode;
+    playSound('win');
   }
+
+  // Play turn sound when it becomes your turn
+  if (!wasMyTurn && state.isYourTurn) {
+    playSound('turn');
+    showToast('Your turn!', 'info');
+  }
+
   renderGame(state);
 });
 
@@ -392,7 +407,6 @@ function updateLobbyPlayers(room) {
     container.appendChild(div);
   });
 
-  // Remove bot handlers
   document.querySelectorAll('.remove-bot').forEach(btn => {
     btn.addEventListener('click', () => {
       socket.emit('remove-bot', btn.dataset.bot, (res) => {
@@ -401,7 +415,6 @@ function updateLobbyPlayers(room) {
     });
   });
 
-  // Spectators
   const specSection = document.getElementById('spectators-section');
   const specList = document.getElementById('lobby-spectators');
   if (room.spectators && room.spectators.length > 0) {
@@ -434,7 +447,7 @@ function renderGame(state) {
   const currentPlayer = state.players[state.currentPlayerIndex];
 
   if (state.isYourTurn) {
-    turnInd.textContent = 'Your Turn!';
+    turnInd.textContent = 'YOUR TURN!';
     turnInd.className = 'turn-badge your-turn';
     document.getElementById('game-controls').style.display = 'flex';
     document.getElementById('emoji-bar').style.display = 'flex';
@@ -463,16 +476,25 @@ function renderGame(state) {
     scoreboard.appendChild(div);
   });
 
-  // Other players
+  // Other players with card backs
   const otherDiv = document.getElementById('other-players');
   otherDiv.innerHTML = '';
   state.players.forEach((player, index) => {
     if (index === state.yourIndex) return;
     const div = document.createElement('div');
     div.className = 'other-player' + (index === state.currentPlayerIndex ? ' active' : '');
+
+    // Show card backs
+    let cardBacks = '';
+    for (let i = 0; i < Math.min(player.cardCount, 7); i++) {
+      cardBacks += '<div class="mini-card-back"></div>';
+    }
+    if (player.cardCount > 7) cardBacks += '<span style="font-size:10px;margin-left:2px;">+' + (player.cardCount - 7) + '</span>';
+
     div.innerHTML = `
       <span class="other-player-avatar">${player.avatar ? player.avatar.charAt(0) : '?'}</span>
       <span class="other-player-name">${player.name}</span>
+      <div style="display:flex;gap:1px;margin:2px 0;">${cardBacks}</div>
       <span class="other-player-cards">${player.cardCount} cards</span>
       ${player.saidUno ? '<span class="other-player-uno">UNO!</span>' : ''}
     `;
@@ -482,12 +504,20 @@ function renderGame(state) {
   // Deck
   document.getElementById('deck-count').textContent = state.deckCount || 0;
 
-  // Discard pile
+  // Discard pile with animation
   const discardPile = document.getElementById('discard-pile');
   const topCard = state.topCard;
   if (topCard) {
+    const oldClass = discardPile.className;
     discardPile.className = 'discard-card ' + (state.currentColor || topCard.color);
     discardPile.innerHTML = getCardDisplay(topCard);
+
+    // Add play animation if card changed
+    if (oldClass !== discardPile.className) {
+      discardPile.style.animation = 'none';
+      discardPile.offsetHeight; // trigger reflow
+      discardPile.style.animation = 'cardPlayed 0.4s ease-out';
+    }
   }
 
   // Color indicator
@@ -524,7 +554,7 @@ function renderGame(state) {
     showGameOver(state);
   }
 
-  // Reset buttons
+  // Reset buttons when not your turn
   if (!state.isYourTurn) {
     drawnCard = null;
     document.getElementById('btn-draw').style.display = 'inline-flex';
@@ -547,7 +577,7 @@ function isCardPlayable(card, topCard, currentColor) {
   if (drawnCard && drawnCard !== card) return false;
   if (card.type === 'wild') return true;
   if (card.color === currentColor) return true;
-  if (topCard && card.color === topCard.color && topCard.color !== 'wild') return true;
+  if (topCard && topCard.color !== 'wild' && card.color === topCard.color) return true;
   if (topCard && card.value === topCard.value) return true;
   return false;
 }
@@ -565,12 +595,12 @@ function handleCardClick(index, card) {
 function playSelectedCard(chosenColor) {
   socket.emit('play-card', { cardIndex: selectedCardIndex, chosenColor }, (res) => {
     if (res.success) {
-      playSound('play');
       drawnCard = null;
       document.getElementById('btn-draw').style.display = 'inline-flex';
       document.getElementById('btn-pass').style.display = 'none';
     } else {
       showToast(res.error || 'Invalid play', 'error');
+      playSound('error');
     }
   });
   selectedCardIndex = null;
@@ -593,7 +623,6 @@ function updateChat(messages) {
 
 function showRoundEnd(state) {
   const modal = document.getElementById('roundend-modal');
-  const winner = state.players.find(p => p.wins > 0 && state.winner === p.name) || state.players[0];
   document.getElementById('round-winner-name').textContent = (state.winner || 'Someone') + ' wins!';
   document.getElementById('round-winner-points').textContent = 'Round ' + (state.round - 1);
 
@@ -607,11 +636,7 @@ function showRoundEnd(state) {
   });
 
   const nextBtn = document.getElementById('btn-next-round');
-  if (isHost) {
-    nextBtn.style.display = 'flex';
-  } else {
-    nextBtn.style.display = 'none';
-  }
+  nextBtn.style.display = isHost ? 'flex' : 'none';
 
   modal.classList.add('active');
   playSound('win');
@@ -643,8 +668,8 @@ function showFloatingEmoji(emoji) {
   const el = document.createElement('div');
   el.className = 'floating-emoji';
   el.textContent = emoji;
-  el.style.left = (20 + Math.random() * 60) + '%';
-  el.style.bottom = '20%';
+  el.style.left = (15 + Math.random() * 70) + '%';
+  el.style.bottom = '15%';
   container.appendChild(el);
   setTimeout(() => el.remove(), 2000);
 }
@@ -663,14 +688,17 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     document.getElementById('color-modal').classList.remove('active');
     document.getElementById('chat-panel').classList.remove('active');
-    document.getElementById('settings-modal').classList.remove('active');
     document.getElementById('roundend-modal').classList.remove('active');
   }
-  if (e.key === 'u' || e.key === 'U') {
-    if (currentScreen === 'game') document.getElementById('btn-uno').click();
+  if ((e.key === 'u' || e.key === 'U') && currentScreen === 'game') {
+    document.getElementById('btn-uno').click();
   }
-  if (e.key === 'd' || e.key === 'D') {
-    if (currentScreen === 'game') document.getElementById('btn-draw').click();
+  if ((e.key === 'd' || e.key === 'D') && currentScreen === 'game') {
+    document.getElementById('btn-draw').click();
+  }
+  if ((e.key === 'p' || e.key === 'P') && currentScreen === 'game') {
+    const passBtn = document.getElementById('btn-pass');
+    if (passBtn.style.display !== 'none') passBtn.click();
   }
 });
 

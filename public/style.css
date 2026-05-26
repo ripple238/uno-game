@@ -425,3 +425,82 @@ html, body { height: 100%; overflow: hidden; font-family: 'Poppins', sans-serif;
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
 ::selection { background: rgba(231, 76, 60, 0.3); color: white; }
+
+/* MINI CARD BACKS for other players */
+.mini-card-back {
+  width: 8px;
+  height: 12px;
+  background: linear-gradient(135deg, #2c3e50, #1a1a2e);
+  border-radius: 2px;
+  border: 1px solid var(--uno-yellow);
+  display: inline-block;
+}
+
+/* BETTER CARD PLAY ANIMATION */
+@keyframes cardPlayed {
+  0% { transform: scale(1.4) rotate(15deg); opacity: 0.3; }
+  50% { transform: scale(1.1) rotate(-5deg); opacity: 0.8; }
+  100% { transform: scale(1) rotate(0); opacity: 1; }
+}
+
+/* DRAWN CARD HIGHLIGHT */
+.player-card.just-drawn {
+  animation: drawnPulse 1s ease-in-out infinite;
+  border-color: var(--uno-blue) !important;
+}
+@keyframes drawnPulse {
+  0%, 100% { box-shadow: 0 0 10px rgba(52, 152, 219, 0.5); }
+  50% { box-shadow: 0 0 25px rgba(52, 152, 219, 0.8); }
+}
+
+/* TURN TRANSITION */
+.turn-transition {
+  animation: turnFlash 0.5s ease-out;
+}
+@keyframes turnFlash {
+  0% { background: rgba(46, 204, 113, 0.3); }
+  100% { background: transparent; }
+}
+
+/* CHAT NOTIFICATION */
+.chat-notification {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  width: 18px;
+  height: 18px;
+  background: var(--uno-red);
+  border-radius: 50%;
+  font-size: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: notifPulse 1s infinite;
+}
+@keyframes notifPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+}
+
+/* SPECTATOR VIEW */
+.spectator-hands {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+.spectator-hand {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  background: rgba(0,0,0,0.2);
+  border-radius: 10px;
+}
+.spectator-hand-label {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 4px;
+  color: var(--text-secondary);
+}
