@@ -3,379 +3,399 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>UNO Ultimate - Multiplayer</title>
-  <link rel="stylesheet" href="style.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+  <title>UNO Ultimate</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --red: #e74c3c; --blue: #3498db; --green: #2ecc71; --yellow: #f1c40f;
+      --dark: #0f0a1e; --card-bg: #1a1230; --panel: #241744;
+    }
+    html, body { height: 100%; overflow: hidden; font-family: 'Poppins', sans-serif; background: var(--dark); color: white; }
+    #app { height: 100vh; width: 100vw; position: relative; }
+    .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; flex-direction: column; }
+    .screen.active { display: flex; }
+
+    /* ===== LANDING ===== */
+    #landing-screen { background: radial-gradient(ellipse at center, #2d1b69 0%, #0f0a1e 70%); justify-content: center; align-items: center; text-align: center; }
+    .landing-logo { font-size: 80px; font-weight: 900; letter-spacing: 12px; margin-bottom: 10px; text-shadow: 0 0 40px rgba(231,76,60,0.5); }
+    .landing-logo .r { color: var(--red); } .landing-logo .b { color: var(--blue); } .landing-logo .g { color: var(--green); }
+    .landing-sub { font-size: 16px; color: #a78bfa; margin-bottom: 40px; }
+    .landing-btns { display: flex; flex-direction: column; gap: 12px; width: 280px; }
+    .l-btn { padding: 16px; border: none; border-radius: 14px; font-family: Poppins; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; }
+    .l-btn:hover { transform: translateY(-3px); }
+    .l-btn.p { background: linear-gradient(135deg, var(--red), #c0392b); color: white; box-shadow: 0 8px 25px rgba(231,76,60,0.4); }
+    .l-btn.s { background: var(--panel); color: white; border: 2px solid rgba(255,255,255,0.1); }
+    .l-btn.g { background: transparent; color: #a78bfa; border: 2px dashed rgba(167,139,250,0.3); }
+
+    /* ===== FORM SCREENS ===== */
+    .form-screen { background: var(--dark); padding: 30px 20px; }
+    .form-header { display: flex; align-items: center; gap: 15px; margin-bottom: 30px; }
+    .back-btn { background: var(--panel); border: none; color: white; padding: 10px 16px; border-radius: 10px; cursor: pointer; font-size: 14px; font-family: Poppins; font-weight: 600; }
+    .form-box { max-width: 340px; margin: 0 auto; width: 100%; }
+    .inp { margin-bottom: 20px; }
+    .inp label { display: block; margin-bottom: 8px; font-size: 13px; color: #a78bfa; font-weight: 600; }
+    .inp input { width: 100%; padding: 14px 16px; border: 2px solid rgba(255,255,255,0.08); border-radius: 12px; background: var(--card-bg); color: white; font-family: Poppins; font-size: 15px; }
+    .inp input:focus { outline: none; border-color: var(--red); }
+    .form-btn { width: 100%; padding: 16px; background: linear-gradient(135deg, var(--red), #c0392b); color: white; border: none; border-radius: 14px; font-family: Poppins; font-size: 15px; font-weight: 700; cursor: pointer; }
+    .settings-box { background: var(--panel); padding: 20px; border-radius: 16px; margin-bottom: 20px; }
+    .settings-box h3 { font-size: 14px; color: var(--yellow); margin-bottom: 16px; }
+    .seg { display: flex; background: rgba(0,0,0,0.2); border-radius: 10px; padding: 4px; gap: 4px; }
+    .seg button { flex: 1; padding: 10px; border: none; background: transparent; color: #a78bfa; font-family: Poppins; font-size: 12px; font-weight: 600; border-radius: 8px; cursor: pointer; }
+    .seg button.a { background: var(--red); color: white; }
+    .themes { display: flex; gap: 10px; margin-top: 10px; }
+    .th { width: 36px; height: 36px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; }
+    .th.a { border-color: white; box-shadow: 0 0 0 3px var(--red); }
+
+    /* ===== LOBBY ===== */
+    #lobby-screen { background: var(--dark); padding: 20px; }
+    .lobby-top { text-align: center; margin-bottom: 20px; }
+    .lobby-code { font-size: 42px; font-weight: 900; letter-spacing: 8px; color: var(--yellow); text-shadow: 0 2px 15px rgba(241,196,15,0.3); }
+    .lobby-code-label { font-size: 12px; color: #a78bfa; text-transform: uppercase; letter-spacing: 2px; }
+    .copy-btn { background: var(--panel); border: none; color: white; padding: 8px 14px; border-radius: 8px; cursor: pointer; margin-top: 8px; font-size: 12px; }
+    .players-box { background: var(--panel); border-radius: 16px; padding: 16px; margin-bottom: 16px; flex: 1; overflow-y: auto; }
+    .players-box h3 { font-size: 13px; color: #a78bfa; margin-bottom: 12px; text-transform: uppercase; }
+    .p-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--card-bg); border-radius: 12px; margin-bottom: 8px; }
+    .p-av { width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--red), var(--blue)); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+    .p-name { font-weight: 600; font-size: 14px; flex: 1; }
+    .p-badge { font-size: 10px; padding: 4px 10px; border-radius: 20px; font-weight: 700; }
+    .host-bg { background: var(--yellow); color: var(--dark); }
+    .bot-bg { background: rgba(155,89,182,0.3); color: #d8b4fe; }
+    .bot-row { display: flex; gap: 8px; margin-bottom: 16px; }
+    .bot-btn { flex: 1; padding: 10px; background: var(--panel); border: none; border-radius: 10px; color: white; font-family: Poppins; font-size: 11px; font-weight: 600; cursor: pointer; }
+    .lobby-actions { display: flex; flex-direction: column; gap: 10px; }
+    .lobby-actions button { padding: 16px; border: none; border-radius: 14px; font-family: Poppins; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .start-btn { background: linear-gradient(135deg, var(--green), #27ae60); color: white; }
+    .start-btn:disabled { opacity: 0.4; }
+    .leave-btn { background: var(--panel); color: #ef4444; }
+
+    /* ===== GAME SCREEN - CIRCULAR TABLE ===== */
+    #game-screen { background: radial-gradient(ellipse at center, #2d1b69 0%, #0f0a1e 60%); position: relative; }
+    .game-top-bar { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; }
+    .game-info { display: flex; gap: 12px; align-items: center; }
+    .room-tag { background: rgba(255,255,255,0.08); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .round-tag { background: rgba(241,196,15,0.15); color: var(--yellow); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .game-icons { display: flex; gap: 8px; }
+    .g-icon { width: 36px; height: 36px; background: rgba(255,255,255,0.08); border: none; border-radius: 10px; color: white; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
+
+    /* CIRCULAR TABLE */
+    .table-container { position: relative; flex: 1; display: flex; align-items: center; justify-content: center; }
+    .table { position: relative; width: 320px; height: 320px; }
+
+    /* Center - Deck & Discard */
+    .table-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; gap: 20px; align-items: center; z-index: 10; }
+    .deck-stack { width: 70px; height: 105px; background: linear-gradient(135deg, #1e1e2e, #0f0f1e); border-radius: 12px; border: 3px solid var(--yellow); display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+    .deck-stack::before { content: "UNO"; font-size: 14px; font-weight: 900; color: var(--yellow); transform: rotate(-15deg); }
+    .deck-count { position: absolute; bottom: 6px; right: 6px; font-size: 10px; font-weight: 700; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 10px; }
+    .discard-center { width: 70px; height: 105px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; box-shadow: 0 4px 20px rgba(0,0,0,0.5); animation: cardPlay 0.4s ease-out; }
+    @keyframes cardPlay { 0% { transform: scale(1.3) rotate(10deg); opacity: 0.5; } 100% { transform: scale(1) rotate(0); opacity: 1; } }
+    .discard-center.red { background: var(--red); } .discard-center.blue { background: var(--blue); }
+    .discard-center.green { background: var(--green); } .discard-center.yellow { background: var(--yellow); color: #1a1a2e; }
+    .discard-center.wild { background: linear-gradient(135deg, var(--red), var(--blue), var(--green), var(--yellow)); color: white; }
+    .color-dot { position: absolute; bottom: -25px; left: 50%; transform: translateX(-50%); width: 24px; height: 24px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3); }
+
+    /* Players around table */
+    .table-player { position: absolute; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: all 0.3s; }
+    .table-player.active .tp-avatar { box-shadow: 0 0 20px rgba(46,204,113,0.6); border-color: var(--green); }
+    .table-player.active .tp-name { color: var(--green); }
+    .tp-avatar { width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, #667eea, #764ba2); display: flex; align-items: center; justify-content: center; font-size: 20px; border: 3px solid rgba(255,255,255,0.2); }
+    .tp-name { font-size: 11px; font-weight: 600; max-width: 70px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .tp-cards { display: flex; gap: 2px; }
+    .tp-mini-card { width: 14px; height: 20px; background: linear-gradient(135deg, #2c3e50, #1a1a2e); border-radius: 3px; border: 1px solid var(--yellow); }
+    .tp-uno { font-size: 10px; color: var(--red); font-weight: 700; }
+    .tp-score { font-size: 10px; color: var(--yellow); }
+
+    /* Position players in circle */
+    .tp-pos-0 { top: -60px; left: 50%; transform: translateX(-50%); } /* Top */
+    .tp-pos-1 { top: 20px; right: -80px; } /* Top-right */
+    .tp-pos-2 { bottom: 20px; right: -80px; } /* Bottom-right */
+    .tp-pos-3 { bottom: -60px; left: 50%; transform: translateX(-50%); } /* Bottom */
+    .tp-pos-4 { bottom: 20px; left: -80px; } /* Bottom-left */
+    .tp-pos-5 { top: 20px; left: -80px; } /* Top-left */
+
+    /* Arrow showing direction */
+    .direction-arrow { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 200px; height: 200px; border: 2px dashed rgba(255,255,255,0.1); border-radius: 50%; pointer-events: none; }
+    .dir-icon { position: absolute; top: -10px; left: 50%; transform: translateX(-50%); font-size: 20px; opacity: 0.5; }
+
+    /* YOUR HAND */
+    .your-area { padding: 10px 16px 20px; }
+    .your-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .your-label { font-size: 12px; color: #a78bfa; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+    .your-count { font-size: 12px; color: var(--yellow); font-weight: 700; }
+    .your-hand { display: flex; gap: 8px; overflow-x: auto; padding: 8px 4px; scroll-behavior: smooth; justify-content: center; }
+    .your-hand::-webkit-scrollbar { height: 4px; }
+    .your-hand::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+
+    .ycard { width: 65px; height: 98px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; transition: all 0.3s; flex-shrink: 0; position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.4); border: 2px solid transparent; }
+    .ycard:hover { transform: translateY(-15px) scale(1.05); z-index: 100; }
+    .ycard.playable { border-color: var(--green); box-shadow: 0 0 20px rgba(46,204,113,0.5); animation: glow 1.5s ease-in-out infinite; }
+    @keyframes glow { 0%,100% { box-shadow: 0 0 15px rgba(46,204,113,0.4); } 50% { box-shadow: 0 0 30px rgba(46,204,113,0.7); } }
+    .ycard.red { background: var(--red); } .ycard.blue { background: var(--blue); }
+    .ycard.green { background: var(--green); } .ycard.yellow { background: var(--yellow); color: #1a1a2e; }
+    .ycard.wild { background: linear-gradient(135deg, var(--red), var(--blue), var(--green), var(--yellow)); color: white; }
+    .yc-corner { position: absolute; font-size: 10px; font-weight: 700; }
+    .yc-corner.t { top: 4px; left: 6px; } .yc-corner.b { bottom: 4px; right: 6px; transform: rotate(180deg); }
+    .yc-center { font-size: 26px; font-weight: 900; }
+
+    /* CONTROLS */
+    .game-controls { display: flex; gap: 10px; padding: 0 16px 16px; justify-content: center; }
+    .gc-btn { padding: 14px 24px; border: none; border-radius: 14px; font-family: Poppins; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; }
+    .gc-btn:hover { transform: translateY(-2px); }
+    .gc-draw { background: linear-gradient(135deg, #8e44ad, #9b59b6); color: white; }
+    .gc-pass { background: linear-gradient(135deg, #e67e22, #d35400); color: white; }
+    .gc-uno { background: linear-gradient(135deg, var(--red), #c0392b); color: white; animation: unoPulse 1s ease-in-out infinite; font-size: 16px; }
+    @keyframes unoPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+    /* EMOJI BAR */
+    .emoji-bar { display: flex; gap: 6px; justify-content: center; padding: 8px 0; }
+    .em-btn { width: 38px; height: 38px; border: none; border-radius: 50%; background: rgba(255,255,255,0.08); font-size: 18px; cursor: pointer; transition: all 0.2s; }
+    .em-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.2); }
+
+    /* MODALS */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; padding: 20px; backdrop-filter: blur(5px); }
+    .modal.on { display: flex; }
+    .modal-box { background: var(--panel); border-radius: 20px; padding: 30px; max-width: 380px; width: 100%; text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: popIn 0.3s ease-out; }
+    @keyframes popIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+    .color-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0; }
+    .c-btn { height: 70px; border: none; border-radius: 14px; cursor: pointer; font-size: 14px; font-weight: 700; color: white; transition: all 0.2s; }
+    .c-btn:hover { transform: scale(1.05); } .c-r { background: var(--red); } .c-b { background: var(--blue); }
+    .c-g { background: var(--green); } .c-y { background: var(--yellow); color: #1a1a2e; }
+
+    /* ROUND END / GAME OVER */
+    .winner-title { font-size: 32px; font-weight: 900; margin-bottom: 8px; }
+    .winner-sub { color: var(--yellow); font-size: 16px; margin-bottom: 20px; }
+    .score-list { margin: 20px 0; text-align: left; }
+    .sc-row { display: flex; justify-content: space-between; padding: 10px 14px; background: rgba(255,255,255,0.05); border-radius: 10px; margin-bottom: 6px; }
+    .sc-row.win { background: rgba(46,204,113,0.15); border: 1px solid rgba(46,204,113,0.3); }
+    .modal-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+    .modal-actions button { padding: 14px; border: none; border-radius: 12px; font-family: Poppins; font-size: 14px; font-weight: 700; cursor: pointer; }
+    .ma-p { background: linear-gradient(135deg, var(--green), #27ae60); color: white; }
+    .ma-s { background: var(--card-bg); color: white; border: 1px solid rgba(255,255,255,0.1); }
+
+    /* CHAT */
+    .chat-panel { position: fixed; bottom: 0; right: 0; width: 100%; max-width: 380px; height: 50%; max-height: 400px; background: var(--panel); border-radius: 20px 20px 0 0; transform: translateY(100%); transition: transform 0.3s; z-index: 500; display: flex; flex-direction: column; }
+    .chat-panel.open { transform: translateY(0); }
+    .chat-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.08); font-weight: 600; }
+    .chat-head button { background: none; border: none; color: white; font-size: 18px; cursor: pointer; }
+    .chat-msgs { flex: 1; overflow-y: auto; padding: 12px 16px; display: flex; flex-direction: column; gap: 6px; }
+    .chat-msg { font-size: 12px; padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 10px; word-break: break-word; }
+    .chat-msg.sys { color: var(--yellow); font-style: italic; }
+    .chat-in { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .chat-in input { flex: 1; padding: 10px 14px; border: 2px solid rgba(255,255,255,0.08); border-radius: 20px; background: rgba(255,255,255,0.05); color: white; font-family: Poppins; font-size: 13px; }
+    .chat-in button { background: var(--red); border: none; color: white; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; }
+
+    /* FLOATING EMOJIS */
+    .float-emoji { position: fixed; font-size: 32px; animation: floatUp 2s ease-out forwards; pointer-events: none; z-index: 900; }
+    @keyframes floatUp { 0% { opacity: 1; transform: translateY(0) scale(0.5); } 50% { opacity: 1; transform: translateY(-100px) scale(1.2); } 100% { opacity: 0; transform: translateY(-200px) scale(0.8); } }
+
+    /* TOAST */
+    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 2000; display: flex; flex-direction: column; gap: 8px; width: 90%; max-width: 320px; pointer-events: none; }
+    .toast { background: var(--panel); color: white; padding: 12px 18px; border-radius: 12px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 20px rgba(0,0,0,0.4); animation: toastIn 0.3s ease; border-left: 4px solid var(--red); pointer-events: auto; }
+    .toast.ok { border-left-color: var(--green); } .toast.err { border-left-color: var(--red); } .toast.inf { border-left-color: var(--blue); }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* RESPONSIVE */
+    @media (min-width: 768px) {
+      .table { width: 400px; height: 400px; }
+      .tp-pos-1 { right: -100px; } .tp-pos-2 { right: -100px; }
+      .tp-pos-4 { left: -100px; } .tp-pos-5 { left: -100px; }
+      .ycard { width: 75px; height: 112px; }
+      .yc-center { font-size: 30px; }
+    }
+    @media (max-width: 360px) {
+      .table { width: 260px; height: 260px; }
+      .tp-avatar { width: 40px; height: 40px; font-size: 16px; }
+      .tp-pos-1 { right: -60px; } .tp-pos-2 { right: -60px; }
+      .tp-pos-4 { left: -60px; } .tp-pos-5 { left: -60px; }
+      .ycard { width: 55px; height: 82px; }
+      .yc-center { font-size: 20px; }
+    }
+  </style>
 </head>
 <body>
   <div id="app">
-    <!-- ===== LANDING SCREEN ===== -->
+    <!-- LANDING -->
     <div id="landing-screen" class="screen active">
-      <div class="particles" id="particles"></div>
-      <div class="logo-container">
-        <h1 class="logo">
-          <span class="uno-red">U</span><span class="uno-blue">N</span><span class="uno-green">O</span>
-        </h1>
-        <p class="tagline">Play with friends, anywhere, anytime</p>
-        <div class="version-badge">v2.0 Ultimate</div>
-      </div>
-
-      <div class="menu-buttons">
-        <button id="btn-create" class="btn btn-primary btn-glow">
-          <span class="btn-icon">🎮</span>
-          <span>Create Room</span>
-        </button>
-        <button id="btn-join" class="btn btn-secondary">
-          <span class="btn-icon">🔗</span>
-          <span>Join Room</span>
-        </button>
-        <button id="btn-spectate" class="btn btn-ghost">
-          <span class="btn-icon">👁️</span>
-          <span>Spectate Game</span>
-        </button>
-      </div>
-
-      <div class="features-grid">
-        <div class="feature-item">
-          <span class="feature-icon">🤖</span>
-          <span>AI Bots</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">🎨</span>
-          <span>Themes</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">🏆</span>
-          <span>Score Tracking</span>
-        </div>
-        <div class="feature-item">
-          <span class="feature-icon">🔊</span>
-          <span>Sound FX</span>
-        </div>
-      </div>
-
-      <div class="how-to-play">
-        <h3>How to Play</h3>
-        <div class="rules-grid">
-          <div class="rule-item">Match color or number</div>
-          <div class="rule-item">Use Skip, Reverse, Draw 2</div>
-          <div class="rule-item">Wild cards = any color</div>
-          <div class="rule-item">Say UNO at 1 card!</div>
-          <div class="rule-item">First to empty hand wins round</div>
-          <div class="rule-item">Reach target score to win!</div>
-        </div>
+      <h1 class="landing-logo"><span class="r">U</span><span class="b">N</span><span class="g">O</span></h1>
+      <p class="landing-sub">Play with friends, anywhere</p>
+      <div class="landing-btns">
+        <button class="l-btn p" onclick="goTo('create')">🎮 Create Room</button>
+        <button class="l-btn s" onclick="goTo('join')">🔗 Join Room</button>
+        <button class="l-btn g" onclick="goTo('spectate')">👁️ Spectate</button>
       </div>
     </div>
 
-    <!-- ===== CREATE ROOM SCREEN ===== -->
-    <div id="create-screen" class="screen">
-      <div class="screen-header">
-        <button class="btn-back">← Back</button>
+    <!-- CREATE -->
+    <div id="create-screen" class="screen form-screen">
+      <div class="form-header">
+        <button class="back-btn" onclick="goTo('landing')">← Back</button>
         <h2>Create Room</h2>
       </div>
-
-      <div class="form-container">
-        <div class="input-group">
-          <label>Your Name</label>
-          <input type="text" id="create-name" placeholder="Enter your name" maxlength="20">
+      <div class="form-box">
+        <div class="inp"><label>Your Name</label><input type="text" id="c-name" placeholder="Enter name" maxlength="20"></div>
+        <div class="settings-box">
+          <h3>Settings</h3>
+          <div class="seg" id="score-seg"><button data="250">250</button><button class="a" data="500">500</button><button data="1000">1000</button></div>
         </div>
-
-        <div class="settings-section">
-          <h3>Game Settings</h3>
-
-          <div class="setting-item">
-            <label>Target Score</label>
-            <div class="segmented-control">
-              <button class="seg-btn" data-score="250">250</button>
-              <button class="seg-btn active" data-score="500">500</button>
-              <button class="seg-btn" data-score="1000">1000</button>
-            </div>
-          </div>
-
-          <div class="setting-item">
-            <label>Theme</label>
-            <div class="theme-selector">
-              <button class="theme-btn active" data-theme="classic" style="background: linear-gradient(135deg, #e74c3c, #3498db)"></button>
-              <button class="theme-btn" data-theme="neon" style="background: linear-gradient(135deg, #0f0c29, #302b63)"></button>
-              <button class="theme-btn" data-theme="ocean" style="background: linear-gradient(135deg, #006994, #48cae4)"></button>
-              <button class="theme-btn" data-theme="sunset" style="background: linear-gradient(135deg, #ff6b6b, #feca57)"></button>
-              <button class="theme-btn" data-theme="forest" style="background: linear-gradient(135deg, #1b4332, #40916c)"></button>
-              <button class="theme-btn" data-theme="cyberpunk" style="background: linear-gradient(135deg, #0a0a0a, #e94560)"></button>
-            </div>
-          </div>
-
-          <div class="setting-item">
-            <label class="toggle-label">
-              <span>Allow Spectators</span>
-              <input type="checkbox" id="allow-spectators" checked>
-              <span class="toggle-switch"></span>
-            </label>
-          </div>
-        </div>
-
-        <button id="btn-create-confirm" class="btn btn-primary btn-full btn-glow">Create Room</button>
+        <button class="form-btn" onclick="createRoom()">Create Room</button>
       </div>
     </div>
 
-    <!-- ===== JOIN ROOM SCREEN ===== -->
-    <div id="join-screen" class="screen">
-      <div class="screen-header">
-        <button class="btn-back">← Back</button>
+    <!-- JOIN -->
+    <div id="join-screen" class="screen form-screen">
+      <div class="form-header">
+        <button class="back-btn" onclick="goTo('landing')">← Back</button>
         <h2>Join Room</h2>
       </div>
-
-      <div class="form-container">
-        <div class="input-group">
-          <label>Room Code</label>
-          <input type="text" id="join-code" placeholder="Enter room code" maxlength="6" style="text-transform:uppercase;">
-        </div>
-        <div class="input-group">
-          <label>Your Name</label>
-          <input type="text" id="join-name" placeholder="Enter your name" maxlength="20">
-        </div>
-        <button id="btn-join-confirm" class="btn btn-primary btn-full btn-glow">Join Room</button>
+      <div class="form-box">
+        <div class="inp"><label>Room Code</label><input type="text" id="j-code" placeholder="ABC123" maxlength="6" style="text-transform:uppercase"></div>
+        <div class="inp"><label>Your Name</label><input type="text" id="j-name" placeholder="Enter name" maxlength="20"></div>
+        <button class="form-btn" onclick="joinRoom()">Join Room</button>
       </div>
     </div>
 
-    <!-- ===== SPECTATE SCREEN ===== -->
-    <div id="spectate-screen" class="screen">
-      <div class="screen-header">
-        <button class="btn-back">← Back</button>
-        <h2>Spectate Game</h2>
+    <!-- SPECTATE -->
+    <div id="spectate-screen" class="screen form-screen">
+      <div class="form-header">
+        <button class="back-btn" onclick="goTo('landing')">← Back</button>
+        <h2>Spectate</h2>
       </div>
-
-      <div class="form-container">
-        <div class="input-group">
-          <label>Room Code</label>
-          <input type="text" id="spectate-code" placeholder="Enter room code" maxlength="6" style="text-transform:uppercase;">
-        </div>
-        <div class="input-group">
-          <label>Your Name (optional)</label>
-          <input type="text" id="spectate-name" placeholder="Spectator" maxlength="20">
-        </div>
-        <button id="btn-spectate-confirm" class="btn btn-primary btn-full">Watch Game</button>
+      <div class="form-box">
+        <div class="inp"><label>Room Code</label><input type="text" id="s-code" placeholder="ABC123" maxlength="6" style="text-transform:uppercase"></div>
+        <div class="inp"><label>Your Name</label><input type="text" id="s-name" placeholder="Spectator" maxlength="20"></div>
+        <button class="form-btn" onclick="spectateRoom()">Watch Game</button>
       </div>
     </div>
 
-    <!-- ===== LOBBY SCREEN ===== -->
+    <!-- LOBBY -->
     <div id="lobby-screen" class="screen">
-      <div class="screen-header">
-        <h2>Game Lobby</h2>
+      <div class="lobby-top">
+        <div class="lobby-code-label">Room Code</div>
+        <div class="lobby-code" id="l-code">----</div>
+        <button class="copy-btn" onclick="copyCode()">📋 Copy</button>
       </div>
-
-      <div class="room-info-card">
-        <div class="room-code-display">
-          <span class="label">Room Code</span>
-          <span id="lobby-code" class="code"></span>
-          <button id="btn-copy-code" class="btn-copy">📋</button>
-        </div>
-        <div class="room-meta">
-          <span id="lobby-theme" class="theme-tag">Classic</span>
-          <span id="lobby-mode" class="mode-tag">Classic Mode</span>
-        </div>
+      <div class="players-box">
+        <h3>Players <span id="l-count">(0)</span></h3>
+        <div id="l-players"></div>
       </div>
-
-      <div class="players-section">
-        <h3>Players <span id="player-count">(0/10)</span></h3>
-        <div class="players-list" id="lobby-players"></div>
+      <div class="bot-row" id="bot-row">
+        <button class="bot-btn" onclick="addBot('easy')">🟢 Easy</button>
+        <button class="bot-btn" onclick="addBot('medium')">🟡 Medium</button>
+        <button class="bot-btn" onclick="addBot('hard')">🔴 Hard</button>
       </div>
-
-      <div class="spectators-section" id="spectators-section" style="display:none;">
-        <h3>Spectators</h3>
-        <div class="spectators-list" id="lobby-spectators"></div>
-      </div>
-
-      <div class="bot-controls" id="bot-controls">
-        <h3>Add AI Bots</h3>
-        <div class="bot-buttons">
-          <button class="btn-bot" data-difficulty="easy">🟢 Easy Bot</button>
-          <button class="btn-bot" data-difficulty="medium">🟡 Medium Bot</button>
-          <button class="btn-bot" data-difficulty="hard">🔴 Hard Bot</button>
-        </div>
-      </div>
-
       <div class="lobby-actions">
-        <button id="btn-start-game" class="btn btn-primary btn-full btn-glow" disabled>Start Game</button>
-        <button id="btn-leave-lobby" class="btn btn-danger btn-full">Leave Room</button>
+        <button class="start-btn" id="s-btn" onclick="startGame()" disabled>Start Game</button>
+        <button class="leave-btn" onclick="location.reload()">Leave Room</button>
       </div>
     </div>
 
-    <!-- ===== GAME SCREEN ===== -->
+    <!-- GAME - CIRCULAR TABLE -->
     <div id="game-screen" class="screen">
-      <!-- Game Header -->
-      <div class="game-header">
-        <div class="game-info-left">
-          <span id="game-room-code" class="room-tag"></span>
-          <div class="score-display">
-            <span>Round <span id="round-number">1</span></span>
-            <span class="score-sep">|</span>
-            <span>Target: <span id="target-score">500</span></span>
+      <div class="game-top-bar">
+        <div class="game-info">
+          <span class="room-tag" id="g-room">Room: ----</span>
+          <span class="round-tag">Round <span id="g-round">1</span> | Target: <span id="g-target">500</span></span>
+        </div>
+        <div class="game-icons">
+          <button class="g-icon" id="snd-btn" onclick="toggleSound()">🔊</button>
+          <button class="g-icon" onclick="toggleChat()">💬</button>
+        </div>
+      </div>
+
+      <div class="table-container">
+        <div class="table" id="table">
+          <!-- Direction arrow -->
+          <div class="direction-arrow"><span class="dir-icon" id="dir-icon">↻</span></div>
+
+          <!-- Players positioned around circle -->
+          <div id="table-players"></div>
+
+          <!-- Center: Deck & Discard -->
+          <div class="table-center">
+            <div class="deck-stack" onclick="drawCard()">
+              <span class="deck-count" id="d-count">0</span>
+            </div>
+            <div class="discard-center" id="discard">?</div>
+            <div class="color-dot" id="c-dot"></div>
           </div>
         </div>
-        <div class="game-info-center">
-          <div id="turn-indicator" class="turn-badge"></div>
-        </div>
-        <div class="game-info-right">
-          <button id="btn-sound-toggle" class="icon-btn" title="Toggle Sound">🔊</button>
-          <button id="btn-game-menu" class="icon-btn" title="Menu">☰</button>
-        </div>
       </div>
 
-      <!-- Scoreboard -->
-      <div class="scoreboard" id="scoreboard">
-        <!-- Dynamic scoreboard -->
-      </div>
-
-      <!-- Other Players -->
-      <div class="other-players" id="other-players"></div>
-
-      <!-- Game Board -->
-      <div class="game-board">
-        <div class="deck-area">
-          <div id="deck-pile" class="card-back deck-card">
-            <span class="deck-label">UNO</span>
-            <span class="deck-count" id="deck-count"></span>
-          </div>
-          <div id="discard-pile" class="discard-card"></div>
+      <div class="your-area">
+        <div class="your-header">
+          <span class="your-label">Your Cards</span>
+          <span class="your-count" id="y-count">0 cards</span>
         </div>
-        <div class="color-indicator">
-          <div class="current-color" id="current-color"></div>
-          <span class="color-label" id="color-label"></span>
-        </div>
+        <div class="your-hand" id="y-hand"></div>
       </div>
 
-      <!-- Player Hand -->
-      <div class="player-hand-container">
-        <div class="hand-header">
-          <span class="hand-label">Your Cards</span>
-          <span id="hand-count" class="hand-count"></span>
-        </div>
-        <div class="player-hand" id="player-hand"></div>
+      <div class="game-controls" id="g-ctrl">
+        <button class="gc-btn gc-draw" id="btn-draw" onclick="drawCard()">🎴 Draw</button>
+        <button class="gc-btn gc-pass" id="btn-pass" onclick="passTurn()" style="display:none">⏭ Pass</button>
+        <button class="gc-btn gc-uno" onclick="sayUno()">🔴 UNO!</button>
       </div>
 
-      <!-- Game Controls -->
-      <div class="game-controls" id="game-controls">
-        <button id="btn-draw" class="btn btn-draw">🎴 Draw</button>
-        <button id="btn-pass" class="btn btn-pass" style="display:none;">⏭ Pass</button>
-        <button id="btn-uno" class="btn btn-uno">🔴 UNO!</button>
-      </div>
-
-      <!-- Emoji Reactions Bar -->
-      <div class="emoji-bar" id="emoji-bar">
-        <button class="emoji-btn" data-emoji="🔥">🔥</button>
-        <button class="emoji-btn" data-emoji="👏">👏</button>
-        <button class="emoji-btn" data-emoji="😂">😂</button>
-        <button class="emoji-btn" data-emoji="😱">😱</button>
-        <button class="emoji-btn" data-emoji="🤔">🤔</button>
-        <button class="emoji-btn" data-emoji="👍">👍</button>
-        <button class="emoji-btn" data-emoji="🎉">🎉</button>
-        <button class="emoji-btn" data-emoji="😭">😭</button>
-        <button class="emoji-btn" data-emoji="🤯">🤯</button>
-        <button class="emoji-btn" data-emoji="💀">💀</button>
+      <div class="emoji-bar" id="e-bar">
+        <button class="em-btn" onclick="sendEmoji('🔥')">🔥</button>
+        <button class="em-btn" onclick="sendEmoji('👏')">👏</button>
+        <button class="em-btn" onclick="sendEmoji('😂')">😂</button>
+        <button class="em-btn" onclick="sendEmoji('😱')">😱</button>
+        <button class="em-btn" onclick="sendEmoji('🤔')">🤔</button>
+        <button class="em-btn" onclick="sendEmoji('👍')">👍</button>
+        <button class="em-btn" onclick="sendEmoji('🎉')">🎉</button>
+        <button class="em-btn" onclick="sendEmoji('😭')">😭</button>
+        <button class="em-btn" onclick="sendEmoji('🤯')">🤯</button>
+        <button class="em-btn" onclick="sendEmoji('💀')">💀</button>
       </div>
     </div>
 
-    <!-- ===== COLOR PICKER MODAL ===== -->
-    <div id="color-modal" class="modal">
-      <div class="modal-content modal-color">
+    <!-- COLOR MODAL -->
+    <div class="modal" id="color-modal">
+      <div class="modal-box">
         <h3>Choose Color</h3>
-        <div class="color-options">
-          <button class="color-btn color-red" data-color="red">
-            <span>🔴 Red</span>
-          </button>
-          <button class="color-btn color-blue" data-color="blue">
-            <span>🔵 Blue</span>
-          </button>
-          <button class="color-btn color-green" data-color="green">
-            <span>🟢 Green</span>
-          </button>
-          <button class="color-btn color-yellow" data-color="yellow">
-            <span>🟡 Yellow</span>
-          </button>
+        <div class="color-grid">
+          <button class="c-btn c-r" onclick="pickColor('red')">🔴 Red</button>
+          <button class="c-btn c-b" onclick="pickColor('blue')">🔵 Blue</button>
+          <button class="c-btn c-g" onclick="pickColor('green')">🟢 Green</button>
+          <button class="c-btn c-y" onclick="pickColor('yellow')">🟡 Yellow</button>
         </div>
       </div>
     </div>
 
-    <!-- ===== ROUND END MODAL ===== -->
-    <div id="roundend-modal" class="modal">
-      <div class="modal-content">
-        <div class="round-winner">
-          <span class="trophy">🏆</span>
-          <h2 id="round-winner-name"></h2>
-          <p id="round-winner-points"></p>
-        </div>
-        <div class="round-scores" id="round-scores"></div>
-        <button id="btn-next-round" class="btn btn-primary btn-full btn-glow">Next Round</button>
-      </div>
-    </div>
-
-    <!-- ===== GAME OVER MODAL ===== -->
-    <div id="gameover-modal" class="modal">
-      <div class="modal-content modal-winner">
-        <div class="winner-animation">
-          <span class="confetti">🎉</span>
-          <span class="confetti">🏆</span>
-          <span class="confetti">🎊</span>
-        </div>
-        <h2 id="winner-text"></h2>
-        <p class="winner-subtitle">Champion!</p>
-        <div class="final-scores" id="final-scores"></div>
-        <div class="winner-actions">
-          <button id="btn-play-again" class="btn btn-primary btn-glow">Play Again</button>
-          <button id="btn-back-lobby" class="btn btn-secondary">Back to Lobby</button>
+    <!-- ROUND END -->
+    <div class="modal" id="round-modal">
+      <div class="modal-box">
+        <div class="winner-title">🏆 Round Winner!</div>
+        <div class="winner-sub" id="rw-name"></div>
+        <div class="score-list" id="rw-scores"></div>
+        <div class="modal-actions">
+          <button class="ma-p" id="nr-btn" onclick="nextRound()">Next Round</button>
         </div>
       </div>
     </div>
 
-    <!-- ===== SETTINGS MODAL ===== -->
-    <div id="settings-modal" class="modal">
-      <div class="modal-content">
-        <h3>Settings</h3>
-        <div class="settings-list">
-          <div class="setting-row">
-            <span>Sound Effects</span>
-            <label class="toggle-label">
-              <input type="checkbox" id="setting-sound" checked>
-              <span class="toggle-switch"></span>
-            </label>
-          </div>
-          <div class="setting-row">
-            <span>Music</span>
-            <label class="toggle-label">
-              <input type="checkbox" id="setting-music">
-              <span class="toggle-switch"></span>
-            </label>
-          </div>
-          <div class="setting-row">
-            <span>Animations</span>
-            <label class="toggle-label">
-              <input type="checkbox" id="setting-animations" checked>
-              <span class="toggle-switch"></span>
-            </label>
-          </div>
+    <!-- GAME OVER -->
+    <div class="modal" id="over-modal">
+      <div class="modal-box">
+        <div class="winner-title" id="gw-text">🎉 Winner!</div>
+        <div class="winner-sub" id="gw-name"></div>
+        <div class="score-list" id="gw-scores"></div>
+        <div class="modal-actions">
+          <button class="ma-p" onclick="playAgain()">Play Again</button>
+          <button class="ma-s" onclick="location.reload()">Leave</button>
         </div>
-        <button id="btn-close-settings" class="btn btn-secondary btn-full">Close</button>
       </div>
     </div>
 
-    <!-- ===== CHAT PANEL ===== -->
-    <div id="chat-panel" class="chat-panel">
-      <div class="chat-header">
-        <span>💬 Chat</span>
-        <button id="btn-close-chat">✕</button>
-      </div>
-      <div class="chat-messages" id="chat-messages"></div>
-      <div class="chat-input-area">
-        <input type="text" id="chat-input" placeholder="Type a message..." maxlength="100">
-        <button id="btn-send-chat">➤</button>
-      </div>
+    <!-- CHAT -->
+    <div class="chat-panel" id="chat">
+      <div class="chat-head"><span>💬 Chat</span><button onclick="toggleChat()">✕</button></div>
+      <div class="chat-msgs" id="chat-msgs"></div>
+      <div class="chat-in"><input type="text" id="chat-in" placeholder="Type..." maxlength="100"><button onclick="sendChat()">➤</button></div>
     </div>
 
-    <!-- ===== FLOATING EMOJIS ===== -->
-    <div id="floating-emojis"></div>
-
-    <!-- ===== TOAST CONTAINER ===== -->
-    <div id="toast-container"></div>
+    <div class="toast-container" id="toasts"></div>
+    <div id="float-emojis"></div>
   </div>
 
   <script src="/socket.io/socket.io.js"></script>
