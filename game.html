@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>UNO Game</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body class="game-body">
+  <!-- Background -->
+  <div class="game-bg"></div>
+  <div class="table-glow"></div>
+
+  <!-- SPECTATOR BANNER -->
+  <div class="spec-banner hidden" id="spec-banner">👁️ Spectator Mode</div>
+
+  <!-- HEADER -->
+  <header class="game-topbar">
+    <div class="topbar-left">
+      <div class="brand-small">
+        <div class="brand-logo">
+          <span class="b-red">U</span><span class="b-yellow">N</span><span class="b-green">O</span>
+        </div>
+        <span class="brand-text">CLASSIC UNO</span>
+      </div>
+      <div class="match-info">
+        <span class="timer" id="game-timer">⏱ 00:00</span>
+        <span class="round-info" id="game-round">⭐ Round 1 / ?</span>
+      </div>
+    </div>
+
+    <div class="topbar-right">
+      <button class="top-btn" onclick="showInfo()" title="Info">ℹ️</button>
+      <button class="top-btn" onclick="toggleChat()" title="Chat">💬</button>
+      <button class="top-btn" onclick="showSettings()" title="Settings">⚙️</button>
+      <button class="top-btn leave" onclick="leaveGame()" title="Leave">🚪</button>
+    </div>
+  </header>
+
+  <!-- MAIN GAME AREA -->
+  <main class="game-table">
+    <!-- Player positions around table -->
+    <div class="seat seat-top" id="seat-top"></div>
+    <div class="seat seat-left" id="seat-left"></div>
+    <div class="seat seat-right" id="seat-right"></div>
+    <div class="seat seat-bottomleft" id="seat-bl"></div>
+    <div class="seat seat-bottomright" id="seat-br"></div>
+
+    <!-- Center Table -->
+    <div class="table-center">
+      <div class="center-mat">
+        <!-- Direction arrows -->
+        <div class="dir-arrow dir-left" id="dir-left">⬅</div>
+        <div class="dir-arrow dir-right" id="dir-right">➡</div>
+
+        <!-- Deck -->
+        <div class="deck-zone">
+          <div class="deck-stack" id="deck-stack" onclick="drawCard()">
+            <div class="deck-card-real"></div>
+            <div class="deck-card-real"></div>
+            <div class="deck-card-real"></div>
+          </div>
+          <div class="deck-count" id="deck-count">108</div>
+        </div>
+
+        <!-- Discard -->
+        <div class="discard-zone">
+          <div class="discard-stack" id="discard-stack">
+            <div class="top-card-real" id="top-card">
+              <div class="tc-oval">?</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pending draw badge -->
+        <div class="pending-badge hidden" id="pending-badge">
+          <span class="pb-icon">⚡</span>
+          <span class="pb-text" id="pending-text">+2</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLOR PICKER -->
+    <div class="color-modal hidden" id="color-modal">
+      <div class="color-title">Pick a Color</div>
+      <div class="color-grid">
+        <div class="cg-red" onclick="pickColor('red')"></div>
+        <div class="cg-blue" onclick="pickColor('blue')"></div>
+        <div class="cg-green" onclick="pickColor('green')"></div>
+        <div class="cg-yellow" onclick="pickColor('yellow')"></div>
+      </div>
+    </div>
+  </main>
+
+  <!-- YOUR HAND -->
+  <div class="your-area" id="your-area">
+    <div class="hand-label">You</div>
+    <div class="your-cards" id="your-cards"></div>
+    <div class="hand-actions">
+      <button class="emoji-btn" onclick="toggleEmojiBar()">😊 Emoji</button>
+      <button class="uno-bigbtn hidden" id="uno-btn" onclick="sayUno()">UNO!</button>
+    </div>
+  </div>
+
+  <!-- EMOJI BAR -->
+  <div class="emoji-bar hidden" id="emoji-bar">
+    <button onclick="sendEmoji('🔥')">🔥</button>
+    <button onclick="sendEmoji('😂')">😂</button>
+    <button onclick="sendEmoji('😱')">😱</button>
+    <button onclick="sendEmoji('👏')">👏</button>
+    <button onclick="sendEmoji('🎉')">🎉</button>
+    <button onclick="sendEmoji('😢')">😢</button>
+    <button onclick="sendEmoji('🍀')">🍀</button>
+    <button onclick="sendEmoji('💀')">💀</button>
+  </div>
+
+  <!-- CHAT SIDEBAR -->
+  <div class="chat-sidebar hidden" id="chat-sidebar">
+    <div class="chat-head">
+      <span>💬 Chat</span>
+      <button onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-body" id="chat-body"></div>
+    <div class="chat-foot">
+      <input type="text" id="chat-in" placeholder="Type message..." maxlength="80">
+      <button onclick="sendChat()">➤</button>
+    </div>
+  </div>
+
+  <!-- SCORE MODAL -->
+  <div class="game-modal hidden" id="score-modal">
+    <div class="modal-box">
+      <h2>🏆 Scoreboard</h2>
+      <div class="score-list" id="score-list"></div>
+      <button class="btn-main" onclick="closeModal('score-modal')">Close</button>
+    </div>
+  </div>
+
+  <!-- ROUND END MODAL -->
+  <div class="game-modal hidden" id="round-modal">
+    <div class="modal-box round-box">
+      <div class="round-winner-text" id="round-winner"></div>
+      <div class="round-scores-list" id="round-scores"></div>
+      <button class="btn-main btn-glow" id="next-round-btn" onclick="nextRound()">Next Round →</button>
+    </div>
+  </div>
+
+  <!-- GAME OVER MODAL -->
+  <div class="game-modal hidden" id="over-modal">
+    <div class="modal-box over-box">
+      <div class="over-trophy">🏆</div>
+      <h1 id="over-winner">Winner!</h1>
+      <p class="over-sub">Game Over</p>
+      <div class="over-scores" id="over-scores"></div>
+      <div class="over-btns">
+        <button class="btn-main" onclick="playAgain()">Play Again</button>
+        <button class="btn-sec" onclick="goHome()">Main Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETTINGS MODAL -->
+  <div class="game-modal hidden" id="settings-modal">
+    <div class="modal-box">
+      <h2>⚙️ Settings</h2>
+      <div class="set-row">
+        <span>Sound Effects</span>
+        <button class="toggle-btn" id="set-sound" onclick="toggleSound()">ON</button>
+      </div>
+      <div class="set-row">
+        <span>Music</span>
+        <button class="toggle-btn" id="set-music" onclick="toggleMusic()">OFF</button>
+      </div>
+      <div class="set-row">
+        <span>Card Theme</span>
+        <select id="set-theme" onchange="changeGameTheme()">
+          <option value="classic">Classic</option>
+          <option value="modern">Modern</option>
+          <option value="dark">Dark</option>
+        </select>
+      </div>
+      <button class="btn-main" onclick="closeModal('settings-modal')">Done</button>
+    </div>
+  </div>
+
+  <!-- INFO MODAL -->
+  <div class="game-modal hidden" id="info-modal">
+    <div class="modal-box">
+      <h2>ℹ️ How to Play</h2>
+      <div class="info-text">
+        <p><b>Goal:</b> Be first to play all your cards.</p>
+        <p><b>Match:</b> Play a card matching the color or number of the top card.</p>
+        <p><b>Special Cards:</b></p>
+        <p>• <b>Skip (⊘)</b> — Next player misses a turn</p>
+        <p>• <b>Reverse (⇄)</b> — Changes play direction</p>
+        <p>• <b>+2</b> — Next player draws 2 cards</p>
+        <p>• <b>Wild (★)</b> — Choose any color</p>
+        <p>• <b>+4</b> — Choose color + next player draws 4</p>
+        <p><b>UNO:</b> Press the UNO button when you have 1 card left!</p>
+        <p><b>Scoring:</b> Winner gets points from opponents' hands. First to 500 wins!</p>
+      </div>
+      <button class="btn-main" onclick="closeModal('info-modal')">Got it</button>
+    </div>
+  </div>
+
+  <!-- TOASTS -->
+  <div id="toasts"></div>
+
+  <!-- FLOATING EMOJIS -->
+  <div class="float-emoji-layer" id="float-emojis"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/sounds.js"></script>
+  <script src="/js/animations.js"></script>
+  <script src="/js/game.js"></script>
+</body>
+</html>
