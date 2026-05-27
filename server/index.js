@@ -2,10 +2,18 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 import { UnoGame } from './gameLogic.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const app = express();
 app.use(cors());
+
+// Serve static frontend files from the dist folder
+app.use(express.static(join(__dirname, '../dist')));
 
 const server = createServer(app);
 const io = new Server(server, {
@@ -115,6 +123,11 @@ io.on('connection', (socket) => {
       }
     }
   });
+});
+
+// Fallback for React Router SPA
+app.get('*', (req, res) => {
+  res.sendFile(join(__dirname, '../dist/index.html'));
 });
 
 const PORT = process.env.PORT || 3001;
