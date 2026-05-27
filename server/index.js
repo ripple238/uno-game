@@ -125,8 +125,8 @@ io.on('connection', (socket) => {
   });
 });
 
-// Fallback for React Router SPA
-app.get('*', (req, res) => {
+// Fallback for React Router SPA (Express 5 safe)
+app.use((req, res) => {
   res.sendFile(join(__dirname, '../dist/index.html'));
 });
 
