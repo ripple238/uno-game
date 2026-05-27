@@ -10,17 +10,20 @@ export default {
         sans: ['Inter', 'ui-sans-serif', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
       },
       colors: {
-        notion: {
-          bg: '#ffffff',
-          text: '#37352f',
-          gray: '#f7f6f3',
-          border: '#e9e9e7',
-          hover: '#efefef',
-          sidebar: '#fbfbfa',
-          darkBg: '#191919',
-          darkText: '#ffffff',
-          darkGray: '#202020',
-          darkBorder: '#373737',
+        neon: {
+          red: 'var(--color-neon-red)',
+          blue: 'var(--color-neon-blue)',
+          green: 'var(--color-neon-green)',
+          yellow: 'var(--color-neon-yellow)',
+          purple: 'var(--color-neon-purple)',
+          pink: 'var(--color-neon-pink)',
+        },
+        card: {
+          red: 'var(--color-card-red)',
+          blue: 'var(--color-card-blue)',
+          green: 'var(--color-card-green)',
+          yellow: 'var(--color-card-yellow)',
+          black: 'var(--color-card-black)',
         }
       }
     },

@@ -1,6 +1,8 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
+:root {
   --color-neon-red: #ff073a;
   --color-neon-blue: #00e5ff;
   --color-neon-green: #39ff14;

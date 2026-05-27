@@ -71,7 +71,7 @@ export const GameBoard: React.FC<GameBoardProps> = ({
       {/* Top Bar: Opponents & Info */}
       <div className="relative z-10 flex-none h-32 p-4 flex justify-between items-start">
         <div className="flex gap-4">
-          {opponents.map((p: any, idx: number) => {
+          {opponents.map((p: any) => {
             const isTheirTurn = gameState.players[gameState.currentTurnIndex]?.id === p.id;
             return (
               <motion.div 

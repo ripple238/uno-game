@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { Lobby } from './components/Lobby';
 import { GameBoard } from './components/GameBoard';
-import { FloatingChat, EmojiEvent, ChatEvent } from './components/FloatingChat';
+import { FloatingChat, type EmojiEvent, type ChatEvent } from './components/FloatingChat';
 import { useGameAudio } from './hooks/useGameAudio';
 
 // If deployed, point to your backend URL. For local, use localhost:3001
@@ -68,7 +68,7 @@ function App() {
       if (data.type === 'win') playWinSound();
     });
 
-    socket.on('playerWon', (data) => {
+    socket.on('playerWon', () => {
       // Just receive event, UI state will update via gameState
       // Could trigger toast here
     });

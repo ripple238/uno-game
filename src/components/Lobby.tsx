@@ -13,7 +13,7 @@ interface LobbyProps {
 export const Lobby: React.FC<LobbyProps> = ({ onJoin, onCreate, onAddBot, onStart, gameState, roomCode }) => {
   const [name, setName] = useState('');
   const [joinCode, setJoinCode] = useState('');
-  const [theme, setTheme] = useState('neon');
+  const [theme] = useState('neon');
 
   if (roomCode && gameState) {
     // Inside a room lobby
