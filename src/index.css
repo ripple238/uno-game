@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+@theme {
+  --color-neon-red: #ff073a;
+  --color-neon-blue: #00e5ff;
+  --color-neon-green: #39ff14;
+  --color-neon-yellow: #ffea00;
+  --color-neon-purple: #b026ff;
+  --color-neon-pink: #ff00ff;
+  
+  --color-card-red: #ff5555;
+  --color-card-blue: #5555ff;
+  --color-card-green: #55aa55;
+  --color-card-yellow: #ffaa00;
+  --color-card-black: #222222;
+}
+
+@layer base {
+  body {
+    @apply bg-zinc-950 text-white overflow-hidden m-0 p-0 font-sans;
+  }
+}
+
+.glass-panel {
+  @apply bg-zinc-900/50 backdrop-blur-md border border-zinc-700/50 rounded-2xl shadow-xl;
+}
+
+.glow-red { box-shadow: 0 0 15px var(--color-neon-red); }
+.glow-blue { box-shadow: 0 0 15px var(--color-neon-blue); }
+.glow-green { box-shadow: 0 0 15px var(--color-neon-green); }
+.glow-yellow { box-shadow: 0 0 15px var(--color-neon-yellow); }
+.glow-white { box-shadow: 0 0 15px #ffffff; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
